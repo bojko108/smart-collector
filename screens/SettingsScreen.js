@@ -1,8 +1,8 @@
 import React from 'react';
-import Constants from 'expo-constants';
-import { Alert, SectionList, Image, StyleSheet, Button, TextInput, Text, View, Picker } from 'react-native';
-
+import { SectionList, StyleSheet, TextInput, Picker } from 'react-native';
+import { ListHeader, SectionHeader, SectionContent } from '../components/Common';
 import { getSetting, setSetting, getAllSettings } from '../storage';
+import Colors from '../constants/Colors';
 
 export default class SettingsScreen extends React.Component {
   constructor(props, context) {
@@ -22,8 +22,10 @@ export default class SettingsScreen extends React.Component {
 
     this.setState({ settings });
   };
-
-  _updateSettingInState = async (key, value) => {
+  /**
+   * Updates a setting value in current state and AsyncStorage
+   */
+  _updateSetting = async (key, value) => {
     let { settings } = this.state;
     for (let i = 0; i < settings.length; i++) {
       if (settings[i].key === key) {
@@ -31,15 +33,11 @@ export default class SettingsScreen extends React.Component {
       }
     }
     this.setState({ settings });
-  };
-  _updateSetting = async ({ key, value }) => {
     await setSetting(key, value);
-
-    Alert.alert('Info', 'Setting was updated!', [{ text: 'OK' }], { cancelable: true });
   };
 
   _renderSectionHeader = ({ section }) => {
-    return <SectionHeader title={section.title} />;
+    return <SectionHeader title={section.title} description={section.data[0].value.description} />;
   };
 
   _renderItem = ({ item }) => {
@@ -48,23 +46,24 @@ export default class SettingsScreen extends React.Component {
     if (setting.type === 'text') {
       return (
         <SectionContent>
-          <TextInput style={styles.sectionContentText} value={setting.value} onChangeText={text => this._updateSettingInState(setting.key, text)} />
-          <Button title='Save' color='#01ff70' onPress={() => this._updateSetting(setting)} />
+          <TextInput
+            style={styles.sectionContentText}
+            value={setting.value}
+            onChangeText={text => {
+              this._updateSetting(setting.key, text);
+            }}
+          />
         </SectionContent>
       );
     } else {
-      return (
-        <SectionContent>
-          <Text style={styles.sectionContentText}>{setting.value}</Text>
-        </SectionContent>
-      );
       // dropdown
       return (
         <SectionContent>
           <Picker
-            // selectedValue={setting.value}
-            style={{ height: 50, width: 100 }}
-            onValueChange={(itemValue, itemIndex) => this._updateSetting({ key: setting.key, value: itemValue })}
+            selectedValue={setting.value}
+            onValueChange={(itemValue, itemIndex) => {
+              this._updateSetting(setting.key, itemValue);
+            }}
           >
             {setting.options.map(({ label, value }) => {
               return <Picker.Item key={`key-${label}`} label={label} value={value} />;
@@ -98,129 +97,26 @@ export default class SettingsScreen extends React.Component {
 }
 
 SettingsScreen.navigationOptions = {
-  title: 'Settings'
-};
-
-const ListHeader = () => {
-  const { manifest } = Constants;
-
-  return (
-    <View style={styles.titleContainer}>
-      <View style={styles.titleIconContainer}>
-        <AppIconPreview iconUrl={manifest.iconUrl} />
-      </View>
-
-      <View style={styles.titleTextContainer}>
-        <Text style={styles.nameText} numberOfLines={1}>
-          {manifest.name}
-        </Text>
-
-        <Text style={styles.slugText} numberOfLines={1}>
-          {manifest.slug}
-        </Text>
-
-        <Text style={styles.descriptionText}>{manifest.description}</Text>
-      </View>
-    </View>
-  );
-};
-
-const SectionHeader = ({ title }) => {
-  return (
-    <View style={styles.sectionHeaderContainer}>
-      <Text style={styles.sectionHeaderText}>{title}</Text>
-    </View>
-  );
-};
-
-const SectionContent = props => {
-  return <View style={styles.sectionContentContainer}>{props.children}</View>;
-};
-
-const AppIconPreview = ({ iconUrl }) => {
-  if (!iconUrl) {
-    iconUrl = 'https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png';
-  }
-
-  return <Image source={{ uri: iconUrl }} style={{ width: 64, height: 64 }} resizeMode='cover' />;
-};
-
-const Color = ({ value }) => {
-  if (!value) {
-    return <View />;
-  } else {
-    return (
-      <View style={styles.colorContainer}>
-        <View style={[styles.colorPreview, { backgroundColor: value }]} />
-        <View style={styles.colorTextContainer}>
-          <Text style={styles.sectionContentText}>{value}</Text>
-        </View>
-      </View>
-    );
+  title: 'Settings',
+  headerStyle: {
+    backgroundColor: Colors.background
+  },
+  headerTintColor: Colors.tintColor,
+  headerTitleStyle: {
+    fontWeight: 'bold'
   }
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
-  },
-  titleContainer: {
-    paddingHorizontal: 15,
-    paddingTop: 15,
-    paddingBottom: 15,
-    flexDirection: 'row'
-  },
-  titleIconContainer: {
-    marginRight: 15,
-    paddingTop: 2
-  },
-  sectionHeaderContainer: {
-    backgroundColor: '#fbfbfb',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ededed'
-  },
-  sectionHeaderText: {
-    fontSize: 14
-  },
-  sectionContentContainer: {
-    paddingTop: 8,
-    paddingBottom: 12,
-    paddingHorizontal: 15
+    backgroundColor: Colors.tintColor
   },
   sectionContentText: {
-    color: '#808080',
-    fontSize: 14
-  },
-  nameText: {
-    fontWeight: '600',
-    fontSize: 18
-  },
-  slugText: {
-    color: '#a39f9f',
+    // color: '#808080',
     fontSize: 14,
-    backgroundColor: 'transparent'
-  },
-  descriptionText: {
-    fontSize: 14,
-    marginTop: 6,
-    color: '#4d4d4d'
-  },
-  colorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  colorPreview: {
-    width: 17,
-    height: 17,
-    borderRadius: 2,
-    marginRight: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ccc'
-  },
-  colorTextContainer: {
-    flex: 1
+    borderColor: Colors.dark,
+    borderWidth: 1,
+    paddingHorizontal: 10
   }
 });
