@@ -20,10 +20,15 @@ export const DWG_BLOCK_NAME = {
 export const DWG_EXPORT_TYPE = {
   key: 'sc_dwg_type',
   title: 'Export Type',
-  description: 'Type of exported file',
-  default: 'blocks',
+  description: 'Type of exported file, When "Blocks" or "Points" a script file will be created.',
+  default: 'dxf',
   type: 'dropdown',
-  options: [{ label: 'Blocks', value: 'blocks' }, { label: 'Points', value: 'points' }]
+  options: [
+    { label: 'DXF', value: 'dxf' },
+    { label: 'Blocks', value: 'blocks' },
+    { label: 'Points', value: 'points' },
+    { label: 'GeoJSON', value: 'geojson' }
+  ]
 };
 export const EMAIL = {
   key: 'sc_email',

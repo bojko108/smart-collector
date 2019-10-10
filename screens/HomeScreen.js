@@ -5,7 +5,7 @@ import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
 import * as FileSystem from 'expo-file-system';
 
-import { saveAsGeoJson } from '../exports';
+import { saveAsGeoJson, saveAsDxf } from '../exports';
 import { getFeatures, setFeatures, getSetting, SETTINGS } from '../storage';
 import Colors from '../constants/Colors';
 
@@ -46,16 +46,37 @@ export default class HomeScreen extends React.Component {
 
   async _sendEmail() {
     const recipient = await getSetting(SETTINGS.EMAIL);
-    const featureCollection = await saveAsGeoJson(this.state.features);
-    const fileName = this._getDateFormatted();
-    const path = `${FileSystem.cacheDirectory}collected-data/${fileName}.geojson`;
+    const exportType = await getSetting(SETTINGS.DWG_EXPORT_TYPE);
+    const targetCRS = await getSetting(SETTINGS.DWG_CRS);
 
-    await FileSystem.writeAsStringAsync(path, JSON.stringify(featureCollection));
+    const fileName = this._getDateFormatted();
+    let extension;
+
+    let fileContent;
+    switch (exportType) {
+      case 'geojson':
+        fileContent = await saveAsGeoJson(this.state.features, targetCRS);
+        fileContent = JSON.stringify(fileContent);
+        extension = '.geojson';
+        break;
+      case 'blocks':
+      case 'points':
+        fileContent = 'not implemented yet';
+        extension = '.scr';
+        break;
+      case 'dxf':
+        fileContent = await saveAsDxf(this.state.features, targetCRS);
+        extension = '.dxf';
+        break;
+    }
+
+    const path = `${FileSystem.cacheDirectory}collected-data/${fileName}${extension}`;
+    await FileSystem.writeAsStringAsync(path, fileContent);
 
     await MailComposer.composeAsync({
       recipients: [recipient],
       subject: `${Constants.manifest.name} - ${fileName}`,
-      body: `Data collected with ${Constants.manifest.name} app, stored to file: ${path}`,
+      body: `Data collected with ${Constants.manifest.name} app, stored to file:\n${path}`,
       attachments: [path],
       isHtml: false
     });
