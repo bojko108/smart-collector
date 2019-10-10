@@ -1,14 +1,16 @@
 const tintColor = '#fff';
-const background = '#f4511e';
+const background = '#2ecc40';
+const darkBackground = '#3d9970';
 const dark = '#aaa';
 const light = '#f0f0f0';
 
 export default {
   dark,
+  darkBackground,
   light,
   background,
   tintColor,
-  tabIconDefault: dark,
+  tabIconDefault: light,
   tabIconSelected: background,
   tabBar: background,
   errorBackground: 'red',

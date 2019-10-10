@@ -19,6 +19,15 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "android": {
+      "package": "com.bojkosoft.smartcollector",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA554p_kSQ3TOXcAZY64E9Jo_z0rrfIteo"
+        }
+      }
+    },
+    "description": ""
   }
 }

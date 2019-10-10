@@ -44,7 +44,6 @@ export const AppIconPreview = ({ iconUrl }) => {
   if (!iconUrl) {
     iconUrl = 'https://s3.amazonaws.com/exp-brand-assets/ExponentEmptyManifest_192.png';
   }
-  console.log(iconUrl);
   return <Image source={{ uri: iconUrl }} style={{ width: 64, height: 64 }} resizeMode='cover' />;
 };
 

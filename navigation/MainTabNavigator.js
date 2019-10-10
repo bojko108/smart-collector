@@ -64,8 +64,10 @@ const tabNavigator = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      activeTintColor: Colors.tabIconSelected,
-      inactiveTintColor: Colors.tabIconDefault
+      activeTintColor: Colors.background,
+      activeBackgroundColor: Colors.tintColor,
+      inactiveTintColor: Colors.light,
+      inactiveBackgroundColor: Colors.background
     }
   }
 );

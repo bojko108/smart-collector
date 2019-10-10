@@ -112,7 +112,7 @@ export default class HomeScreen extends React.Component {
             </Text>
           </TouchableOpacity>
         ))}
-        <FloatingAction actions={actions} color='#f4511e' distanceToEdge={10} onPressItem={this._handleActionPress} />
+        <FloatingAction actions={actions} color={Colors.background} distanceToEdge={10} onPressItem={this._handleActionPress} />
       </View>
     );
   }
