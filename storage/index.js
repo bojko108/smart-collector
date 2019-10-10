@@ -19,11 +19,11 @@ export const getAllSettings = () => {
 };
 
 export const getSetting = async key => {
-  return await AsyncStorage.getItem(key);
+  return await AsyncStorage.getItem(key.key || key);
 };
 
 export const setSetting = async (key, value) => {
-  return await AsyncStorage.setItem(key, value);
+  return await AsyncStorage.setItem(key.key || key, value);
 };
 
 export const getFeatures = async () => {

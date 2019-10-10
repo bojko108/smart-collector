@@ -2567,7 +2567,7 @@ expo-location@^7.0.0, expo-location@~7.0.0:
   dependencies:
     invariant "^2.2.4"
 
-expo-mail-composer@~7.0.0:
+expo-mail-composer@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/expo-mail-composer/-/expo-mail-composer-7.0.0.tgz#dcce0cc0991f546062d23fbdccb604c46d913364"
   integrity sha512-XIfQLW61AIuxoJ2RNVmSPhE0dt68LUh2mLQ5sg6GD2Ve5aLAKvc/rRZP0nGQpti7jPS4/Ft9KyWt4e1lhkhEpA==

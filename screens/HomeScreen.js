@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, Button, Platform, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
-
+import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
 import * as FileSystem from 'expo-file-system';
 
@@ -23,6 +23,10 @@ export default class HomeScreen extends React.Component {
     this.didBlurSubscription = this.props.navigation.addListener('didBlur', () => {
       this.setState({ isFocused: false });
     });
+
+    FileSystem.makeDirectoryAsync(`${FileSystem.cacheDirectory}collected-data`).catch(ex => {
+      // already exists
+    });
   }
 
   componentWillUnmount() {
@@ -40,22 +44,36 @@ export default class HomeScreen extends React.Component {
     this.props.navigation.navigate('AddFeature');
   };
 
-  async _saveAsGeoJson() {
-    const featureCollection = await saveAsGeoJson(this.state.features);
-    console.log(FileSystem.documentDirectory);
-    await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}geojson`);
-    await FileSystem.writeAsStringAsync(`${FileSystem.documentDirectory}geojson/test.json`, JSON.stringify(featureCollection));
-  }
-
   async _sendEmail() {
     const recipient = await getSetting(SETTINGS.EMAIL);
-    console.log(recipient);
-    await MailComposer.composeAsync({ recipients: [recipient], subject: 'title', body: 'body' });
+    const featureCollection = await saveAsGeoJson(this.state.features);
+    const fileName = this._getDateFormatted();
+    const path = `${FileSystem.cacheDirectory}collected-data/${fileName}.geojson`;
+
+    await FileSystem.writeAsStringAsync(path, JSON.stringify(featureCollection));
+
+    await MailComposer.composeAsync({
+      recipients: [recipient],
+      subject: `${Constants.manifest.name} - ${fileName}`,
+      body: `Data collected with ${Constants.manifest.name} app, stored to file: ${path}`,
+      attachments: [path],
+      isHtml: false
+    });
   }
 
   async _deleteFeatures() {
     await setFeatures([]);
     await getFeatures();
+    await FileSystem.deleteAsync(`${FileSystem.cacheDirectory}collected-data`);
+  }
+
+  _getDateFormatted() {
+    const now = new Date();
+    return `${now.getFullYear()}${now.getMonth() < 10 ? '0' + now.getMonth() : now.getMonth()}${
+      now.getDay() < 10 ? '0' + now.getDay() : now.getDay()
+    }@${now.getHours() < 10 ? '0' + now.getHours() : now.getHours()}${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()}${
+      now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
+    }`;
   }
 
   _handleActionPress = async name => {
@@ -66,11 +84,11 @@ export default class HomeScreen extends React.Component {
       case 'bt_send':
         await this._sendEmail();
         break;
-      case 'bt_export':
-        await this._saveAsGeoJson();
-        break;
+      // case 'bt_export':
+      //   await this._saveAsGeoJson();
+      //   break;
       case 'bt_delete':
-        Alert.alert('Delete all collected features!', '', [{ text: 'No', type: 'cancel' }, { text: 'Yes', onPress: this._deleteFeatures }]);
+        Alert.alert('Delete all collected features!', '', [{ text: 'No', style: 'cancel' }, { text: 'Yes', onPress: this._deleteFeatures }]);
         break;
     }
   };
@@ -89,12 +107,6 @@ export default class HomeScreen extends React.Component {
         // icon: require('./images/ic_accessibility_white.png'),
         name: 'bt_send',
         position: 2
-      },
-      {
-        text: 'Export Features',
-        // icon: require('./images/ic_accessibility_white.png'),
-        name: 'bt_export',
-        position: 3
       },
       {
         text: 'Delete All Features',
