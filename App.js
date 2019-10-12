@@ -9,6 +9,13 @@ import AppNavigator from './navigation/AppNavigator';
 
 import { checkSettingsInStore } from './storage';
 
+import configureStore from './store/configureStore';
+import { Provider } from 'react-redux';
+import { featureActions } from './store/actions';
+
+const store = configureStore();
+store.dispatch(featureActions.getFeatures());
+
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
@@ -16,10 +23,12 @@ export default function App(props) {
     return <AppLoading startAsync={loadResourcesAsync} onError={handleLoadingError} onFinish={() => handleFinishLoading(setLoadingComplete)} />;
   } else {
     return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
-        <AppNavigator />
-      </View>
+      <Provider store={store}>
+        <View style={styles.container}>
+          {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
+          <AppNavigator />
+        </View>
+      </Provider>
     );
   }
 }
