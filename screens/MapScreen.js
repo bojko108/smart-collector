@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
 import Colors from '../constants/Colors';
+import { mapStyle } from '../storage';
 
 export default class MapScreen extends React.Component {
   constructor(props, context) {
@@ -13,6 +14,8 @@ export default class MapScreen extends React.Component {
       <View style={styles.container}>
         <MapView
           style={{ flex: 1 }}
+          showsUserLocation={true}
+          customMapStyle={mapStyle}
           initialRegion={{
             latitude: 42.692273,
             longitude: 23.32091,

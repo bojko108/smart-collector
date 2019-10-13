@@ -1,7 +1,8 @@
 import { AsyncStorage } from 'react-native';
-
+import mapStyle from './mapStyle';
 import * as SETTINGS from './settings';
-export { SETTINGS };
+
+export { mapStyle, SETTINGS };
 
 export const checkSettingsInStore = async () => {
   const settings = getAllSettings();
