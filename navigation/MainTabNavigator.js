@@ -67,7 +67,8 @@ const tabNavigator = createBottomTabNavigator(
       activeTintColor: Colors.background,
       activeBackgroundColor: Colors.tintColor,
       inactiveTintColor: Colors.light,
-      inactiveBackgroundColor: Colors.background
+      inactiveBackgroundColor: Colors.background,
+      showLabel: false
     }
   }
 );

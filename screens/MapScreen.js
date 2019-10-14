@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Icon, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Colors from '../constants/Colors';
 import { mapStyle } from '../storage';
@@ -24,16 +24,16 @@ class MapScreen extends React.Component {
             longitudeDelta: 0.0421
           }}
         >
-          {features.map(({ properties, geometry }) => {
+          {features.map(({ properties, geometry }, index) => {
             console.log(geometry);
             const fid = properties.fid;
             const [longitude, latitude] = geometry.coordinates;
-            const marker = { title: fid, latlng: { latitude, longitude } };
+            const marker = { title: fid.toString(), latlng: { latitude, longitude } };
             const isPylon = properties.featureType === 'pylon';
             return (
               <Marker key={fid} anchor={{ x: 0.5, y: 0.5 }} coordinate={marker.latlng} title={marker.title} description={marker.description}>
-                <View style={{ backgroundColor: isPylon ? 'yellow' : 'red', padding: 5 }}>
-                  <Text>{isPylon ? 'Ст' : 'Ш'}</Text>
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={{ backgroundColor: isPylon ? 'yellow' : 'red', padding: 5 }}>{isPylon ? 'Ст' : 'Ш'}</Text>
                 </View>
               </Marker>
             );

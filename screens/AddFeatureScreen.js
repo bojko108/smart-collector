@@ -12,6 +12,7 @@ import { bindActionCreators } from 'redux';
 import { featureActions } from '../store/actions';
 
 const uuid = require('uuid/v4');
+// let currentFid = 0;
 
 class AddFeatureScreen extends React.Component {
   constructor(props, context) {

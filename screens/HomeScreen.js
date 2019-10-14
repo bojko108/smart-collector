@@ -21,6 +21,10 @@ class HomeScreen extends React.Component {
   _sendEmail = async () => {
     const { features } = this.props;
     const recipient = await getSetting(SETTINGS.EMAIL);
+    if (!recipient) {
+      Alert.alert('First define an email address in Settings!', '', [{ text: 'OK', style: 'cancel' }]);
+      return;
+    }
     const exportType = await getSetting(SETTINGS.DWG_EXPORT_TYPE);
     const targetCRS = await getSetting(SETTINGS.DWG_CRS);
 
@@ -107,43 +111,58 @@ class HomeScreen extends React.Component {
     }
   };
 
+  showFeatureInfo = ({ properties, geometry }) => {
+    let infoText = '';
+    for (let key in properties) {
+      infoText += `${key}: ${properties[key]}\n`;
+    }
+    Alert.alert('Feature Info', infoText, [{ text: 'OK', style: 'cancel' }]);
+  };
+
   render() {
     const { features } = this.props;
     const actions = [
       {
         text: 'Add Pylon',
         // icon: require('./images/ic_accessibility_white.png'),
+        color: Colors.darkBackground,
         name: 'bt_add_pylon',
         position: 1
       },
       {
         text: 'Add Manhole',
         // icon: require('./images/ic_accessibility_white.png'),
+        color: Colors.darkBackground,
         name: 'bt_add_manhole',
         position: 1
       },
       {
         text: 'Send Features',
         // icon: require('./images/ic_accessibility_white.png'),
+        color: Colors.darkBackground,
         name: 'bt_send',
         position: 2
       },
       {
         text: 'Delete All Features',
         // icon: require('./images/ic_accessibility_white.png'),
+        color: Colors.darkBackground,
         name: 'bt_delete',
         position: 4
       }
     ];
     return (
       <View style={styles.container}>
-        {features.map((feature, index) => (
-          <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => console.log(feature)}>
-            <Text key={`text-${feature.properties.fid}`} style={styles.text}>
-              {`${index + 1} - precision: ${feature.properties.accuracy.toFixed()} meters`}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {features.map((feature, index) => {
+          const isPylon = feature.properties.featureType === 'pylon';
+          return (
+            <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
+              <Text key={`text-${feature.properties.fid}`} style={styles.text}>
+                {`${index + 1} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
         <FloatingAction actions={actions} color={Colors.background} distanceToEdge={10} onPressItem={this._handleActionPress} />
       </View>
     );
@@ -170,7 +189,7 @@ const styles = StyleSheet.create({
   item: {
     padding: 10,
     marginTop: 3,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.darkBackground
   },
   text: {
     color: Colors.tintColor
