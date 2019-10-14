@@ -14,14 +14,6 @@ import { bindActionCreators } from 'redux';
 import { featureActions } from '../store/actions';
 
 class HomeScreen extends React.Component {
-  async componentDidMount() {
-    const fileUri = `${FileSystem.cacheDirectory}collected-data`;
-    const { exists } = FileSystem.getInfoAsync(fileUri);
-    if (exists === false) {
-      FileSystem.makeDirectoryAsync(fileUri);
-    }
-  }
-
   addFeature = featureType => {
     this.props.navigation.navigate('AddFeature', { featureType });
   };
@@ -53,7 +45,13 @@ class HomeScreen extends React.Component {
         break;
     }
 
-    const path = `${FileSystem.cacheDirectory}collected-data/${fileName}${extension}`;
+    const fileUri = `${FileSystem.cacheDirectory}collected-data`;
+    const { exists } = await FileSystem.getInfoAsync(fileUri);
+    console.log(exists);
+    if (exists === false) {
+      await FileSystem.makeDirectoryAsync(fileUri);
+    }
+    const path = `${fileUri}/${fileName}${extension}`;
     await FileSystem.writeAsStringAsync(path, fileContent);
 
     await MailComposer.composeAsync({
@@ -79,11 +77,14 @@ class HomeScreen extends React.Component {
 
   _getDateFormatted = () => {
     const now = new Date();
-    return `${now.getFullYear()}${now.getMonth() < 10 ? '0' + now.getMonth() : now.getMonth()}${
-      now.getDay() < 10 ? '0' + now.getDay() : now.getDay()
-    }@${now.getHours() < 10 ? '0' + now.getHours() : now.getHours()}${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()}${
-      now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
-    }`;
+    const month = now.getMonth() + 1,
+      day = now.getDate(),
+      hours = now.getHours(),
+      minutes = now.getMinutes(),
+      seconds = now.getSeconds();
+    return `${now.getFullYear()}${month < 10 ? '0' + month : month}${day < 10 ? '0' + day : day}@${hours < 10 ? '0' + hours : hours}${
+      minutes < 10 ? '0' + minutes : minutes
+    }${seconds < 10 ? '0' + seconds : seconds}`;
   };
 
   _handleActionPress = async name => {

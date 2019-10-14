@@ -12,7 +12,7 @@ export const checkSettingsInStore = async () => {
     if (value === null) {
       await setSetting(settings[i].key, settings[i].default);
     }
-    console.log(value);
+    // console.log(value);
   }
 };
 

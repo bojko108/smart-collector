@@ -52,7 +52,8 @@ class AddFeatureScreen extends React.Component {
     if (location) {
       const fid = uuid();
       const { latitude, longitude, accuracy, altitude, heading, speed } = location.coords;
-      let featureProperties = { fid, accuracy, altitude, heading, speed };
+      const featureType = this.props.navigation.getParam('featureType');
+      let featureProperties = { fid, accuracy, altitude, heading, speed, featureType };
       properties.forEach(({ key, value }) => (featureProperties[key] = value));
       const feature = createPointFeature([longitude, latitude], featureProperties);
 
