@@ -1,20 +1,21 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import MapView from 'react-native-maps';
+import { View, Text, StyleSheet } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import Colors from '../constants/Colors';
 import { mapStyle } from '../storage';
 
-export default class MapScreen extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-  }
+import { connect } from 'react-redux';
 
+class MapScreen extends React.Component {
   render() {
+    const { features } = this.props;
+
     return (
       <View style={styles.container}>
         <MapView
           style={{ flex: 1 }}
           showsUserLocation={true}
+          // onUserLocationChange
           customMapStyle={mapStyle}
           initialRegion={{
             latitude: 42.692273,
@@ -22,7 +23,20 @@ export default class MapScreen extends React.Component {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421
           }}
-        />
+        >
+          {features.map(({ properties, geometry }) => {
+            const fid = properties.fid;
+            const [longitude, latitude] = geometry.coordinates;
+            const marker = { title: fid, latlng: { latitude, longitude } };
+            return (
+              <Marker key={fid} anchor={{ x: 0.5, y: 0.5 }} coordinate={marker.latlng} title={marker.title} description={marker.description}>
+                <View style={{ backgroundColor: 'red', padding: 5 }}>
+                  <Text>Ш</Text>
+                </View>
+              </Marker>
+            );
+          })}
+        </MapView>
       </View>
     );
   }
@@ -44,3 +58,12 @@ const styles = StyleSheet.create({
     flex: 1
   }
 });
+
+const mapStateToProps = (features, ownProps) => {
+  return { features };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(MapScreen);
