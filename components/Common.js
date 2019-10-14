@@ -18,7 +18,7 @@ export const ListHeader = () => {
         </Text>
 
         <Text style={styles.slugText} numberOfLines={1}>
-          {manifest.slug}
+          {`${manifest.slug}, v${manifest.version}`}
         </Text>
 
         <Text style={styles.descriptionText}>{manifest.description}</Text>

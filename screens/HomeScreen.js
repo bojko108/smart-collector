@@ -22,8 +22,8 @@ class HomeScreen extends React.Component {
     }
   }
 
-  addFeature = () => {
-    this.props.navigation.navigate('AddFeature');
+  addFeature = featureType => {
+    this.props.navigation.navigate('AddFeature', { featureType });
   };
 
   _sendEmail = async () => {
@@ -88,8 +88,11 @@ class HomeScreen extends React.Component {
 
   _handleActionPress = async name => {
     switch (name) {
-      case 'bt_add':
-        this.addFeature();
+      case 'bt_add_pylon':
+        this.addFeature('pylon');
+        break;
+      case 'bt_add_manhole':
+        this.addFeature('manhole');
         break;
       case 'bt_send':
         await this._sendEmail();
@@ -107,9 +110,15 @@ class HomeScreen extends React.Component {
     const { features } = this.props;
     const actions = [
       {
-        text: 'Add Feature',
+        text: 'Add Pylon',
         // icon: require('./images/ic_accessibility_white.png'),
-        name: 'bt_add',
+        name: 'bt_add_pylon',
+        position: 1
+      },
+      {
+        text: 'Add Manhole',
+        // icon: require('./images/ic_accessibility_white.png'),
+        name: 'bt_add_manhole',
         position: 1
       },
       {
@@ -141,7 +150,7 @@ class HomeScreen extends React.Component {
 }
 
 HomeScreen.navigationOptions = {
-  title: 'Smart Collector',
+  title: 'Features',
   headerStyle: {
     backgroundColor: Colors.background
   },
