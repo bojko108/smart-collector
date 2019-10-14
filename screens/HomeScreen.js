@@ -1,50 +1,25 @@
 import React from 'react';
-import { Alert, Button, Platform, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
 import * as FileSystem from 'expo-file-system';
 
 import { saveAsGeoJson, saveAsDxf } from '../exports';
-import { getFeatures, setFeatures, getSetting, SETTINGS } from '../storage';
+import { getSetting, SETTINGS } from '../storage';
 import Colors from '../constants/Colors';
 
-export default class HomeScreen extends React.Component {
-  constructor(props, context) {
-    super(props, context);
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { featureActions } from '../store/actions';
 
-    this.state = { features: [] };
-  }
-
-  componentDidMount() {
-    this.didFocusSubscription = this.props.navigation.addListener('didFocus', () => {
-      this.getFeatures();
-    });
-    this.didBlurSubscription = this.props.navigation.addListener('didBlur', () => {
-      this.setState({ isFocused: false });
-    });
-
-    FileSystem.makeDirectoryAsync(`${FileSystem.cacheDirectory}collected-data`).catch(ex => {
-      // already exists
-    });
-  }
-
-  componentWillUnmount() {
-    this.didFocusSubscription.remove();
-    this.didBlurSubscription.remove();
-  }
-
-  async getFeatures() {
-    const features = await getFeatures();
-    console.log(features.length);
-    this.setState({ features });
-  }
-
-  addFeature = () => {
-    this.props.navigation.navigate('AddFeature');
+class HomeScreen extends React.Component {
+  addFeature = featureType => {
+    this.props.navigation.navigate('AddFeature', { featureType });
   };
 
-  async _sendEmail() {
+  _sendEmail = async () => {
+    const { features } = this.props;
     const recipient = await getSetting(SETTINGS.EMAIL);
     const exportType = await getSetting(SETTINGS.DWG_EXPORT_TYPE);
     const targetCRS = await getSetting(SETTINGS.DWG_CRS);
@@ -55,7 +30,7 @@ export default class HomeScreen extends React.Component {
     let fileContent;
     switch (exportType) {
       case 'geojson':
-        fileContent = await saveAsGeoJson(this.state.features, targetCRS);
+        fileContent = await saveAsGeoJson(features, targetCRS);
         fileContent = JSON.stringify(fileContent);
         extension = '.geojson';
         break;
@@ -65,12 +40,18 @@ export default class HomeScreen extends React.Component {
         extension = '.scr';
         break;
       case 'dxf':
-        fileContent = await saveAsDxf(this.state.features, targetCRS);
+        fileContent = await saveAsDxf(features, targetCRS);
         extension = '.dxf';
         break;
     }
 
-    const path = `${FileSystem.cacheDirectory}collected-data/${fileName}${extension}`;
+    const fileUri = `${FileSystem.cacheDirectory}collected-data`;
+    const { exists } = await FileSystem.getInfoAsync(fileUri);
+    console.log(exists);
+    if (exists === false) {
+      await FileSystem.makeDirectoryAsync(fileUri);
+    }
+    const path = `${fileUri}/${fileName}${extension}`;
     await FileSystem.writeAsStringAsync(path, fileContent);
 
     await MailComposer.composeAsync({
@@ -80,27 +61,39 @@ export default class HomeScreen extends React.Component {
       attachments: [path],
       isHtml: false
     });
-  }
+  };
 
-  async _deleteFeatures() {
-    await setFeatures([]);
-    await getFeatures();
-    await FileSystem.deleteAsync(`${FileSystem.cacheDirectory}collected-data`);
-  }
+  _deleteFeatures = async () => {
+    this.props.actions.removeAllFeatures();
+    const fileUri = `${FileSystem.cacheDirectory}collected-data`;
+    const { exists } = await FileSystem.getInfoAsync(fileUri);
+    if (exists) {
+      const files = await FileSystem.readDirectoryAsync(fileUri);
+      files.forEach(async fileName => {
+        await FileSystem.deleteAsync(`${fileUri}/${fileName}`);
+      });
+    }
+  };
 
-  _getDateFormatted() {
+  _getDateFormatted = () => {
     const now = new Date();
-    return `${now.getFullYear()}${now.getMonth() < 10 ? '0' + now.getMonth() : now.getMonth()}${
-      now.getDay() < 10 ? '0' + now.getDay() : now.getDay()
-    }@${now.getHours() < 10 ? '0' + now.getHours() : now.getHours()}${now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()}${
-      now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
-    }`;
-  }
+    const month = now.getMonth() + 1,
+      day = now.getDate(),
+      hours = now.getHours(),
+      minutes = now.getMinutes(),
+      seconds = now.getSeconds();
+    return `${now.getFullYear()}${month < 10 ? '0' + month : month}${day < 10 ? '0' + day : day}@${hours < 10 ? '0' + hours : hours}${
+      minutes < 10 ? '0' + minutes : minutes
+    }${seconds < 10 ? '0' + seconds : seconds}`;
+  };
 
   _handleActionPress = async name => {
     switch (name) {
-      case 'bt_add':
-        this.addFeature();
+      case 'bt_add_pylon':
+        this.addFeature('pylon');
+        break;
+      case 'bt_add_manhole':
+        this.addFeature('manhole');
         break;
       case 'bt_send':
         await this._sendEmail();
@@ -115,12 +108,18 @@ export default class HomeScreen extends React.Component {
   };
 
   render() {
-    const { features } = this.state;
+    const { features } = this.props;
     const actions = [
       {
-        text: 'Add Feature',
+        text: 'Add Pylon',
         // icon: require('./images/ic_accessibility_white.png'),
-        name: 'bt_add',
+        name: 'bt_add_pylon',
+        position: 1
+      },
+      {
+        text: 'Add Manhole',
+        // icon: require('./images/ic_accessibility_white.png'),
+        name: 'bt_add_manhole',
         position: 1
       },
       {
@@ -152,7 +151,7 @@ export default class HomeScreen extends React.Component {
 }
 
 HomeScreen.navigationOptions = {
-  title: 'Smart Collector',
+  title: 'Features',
   headerStyle: {
     backgroundColor: Colors.background
   },
@@ -177,3 +176,17 @@ const styles = StyleSheet.create({
     color: Colors.tintColor
   }
 });
+
+const mapStateToProps = (features, ownProps) => {
+  return { features };
+};
+const mapDispatchToProps = dispatch => {
+  return {
+    actions: bindActionCreators(featureActions, dispatch)
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HomeScreen);

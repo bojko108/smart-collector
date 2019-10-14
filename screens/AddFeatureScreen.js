@@ -1,21 +1,25 @@
-import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
-import { Button, Platform, ScrollView, StyleSheet, Text, TextInput, SectionList, View } from 'react-native';
+import { Button, Platform, ScrollView, Picker, StyleSheet, Text, TextInput, SectionList, View } from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import { ListHeader, SectionHeader, SectionContent } from '../components/Common';
+import { SectionHeader, SectionContent } from '../components/Common';
 import Colors from '../constants/Colors';
+import { getPropertiesFor } from '../storage';
+import { createPointFeature } from '../exports';
 
-import { MonoText } from '../components/StyledText';
-import { saveAsGeoJson, createPointFeature } from '../exports';
-import { setFeatures, getFeatures } from '../storage';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { featureActions } from '../store/actions';
 
 const uuid = require('uuid/v4');
 
-export default class AddFeatureScreen extends React.Component {
+class AddFeatureScreen extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.state = { location: null };
+
+    const featureType = this.props.navigation.getParam('featureType');
+    const properties = getPropertiesFor(featureType);
+    this.state = { location: null, properties };
   }
 
   unsubscribe = null;
@@ -43,18 +47,30 @@ export default class AddFeatureScreen extends React.Component {
     this.setState({ location });
   };
 
-  saveFeature = async () => {
-    const { location } = this.state;
+  createFeature = async () => {
+    const { location, properties } = this.state;
     if (location) {
       const fid = uuid();
       const { latitude, longitude, accuracy, altitude, heading, speed } = location.coords;
-      const feature = createPointFeature([longitude, latitude], { fid, accuracy, altitude, heading, speed });
-      let features = await getFeatures();
-      features.push(feature);
-      await setFeatures(features);
+      const featureType = this.props.navigation.getParam('featureType');
+      let featureProperties = { fid, accuracy, altitude, heading, speed, featureType };
+      properties.forEach(({ key, value }) => (featureProperties[key] = value));
+      const feature = createPointFeature([longitude, latitude], featureProperties);
+
+      this.props.actions.addFeature(feature);
 
       this.props.navigation.goBack();
     }
+  };
+
+  _updateProperty = async (key, value) => {
+    let { properties } = this.state;
+    for (let i = 0; i < properties.length; i++) {
+      if (properties[i].key === key) {
+        properties[i].value = value;
+      }
+    }
+    this.setState({ properties });
   };
 
   _renderSectionHeader = ({ section }) => {
@@ -62,38 +78,72 @@ export default class AddFeatureScreen extends React.Component {
   };
 
   _renderItem = ({ item }) => {
-    let coords = item.value || {};
-    return (
-      <SectionContent>
-        <TextInput style={styles.sectionContentText} value={`${coords.latitude}, ${coords.longitude}`} editable={false} />
-      </SectionContent>
-    );
+    let value = item.value || {};
+    if (value.type === 'dropdown') {
+      return (
+        <SectionContent>
+          <Picker
+            selectedValue={value.value}
+            onValueChange={(itemValue, itemIndex) => {
+              this._updateProperty(value.key, itemValue);
+            }}
+          >
+            {value.options.map(({ label, value }) => {
+              return <Picker.Item key={`key-${label}`} label={label} value={value} />;
+            })}
+          </Picker>
+        </SectionContent>
+      );
+    } else if (value.type === 'text') {
+      return (
+        <SectionContent>
+          <TextInput
+            style={styles.sectionContentText}
+            value={value.value}
+            onChangeText={text => {
+              this._updateProperty(value.key, text);
+            }}
+          />
+        </SectionContent>
+      );
+    } else {
+      return (
+        <SectionContent>
+          <TextInput style={styles.sectionContentText} value={`${value.latitude}, ${value.longitude}`} editable={false} />
+        </SectionContent>
+      );
+    }
   };
 
   render() {
-    const { location } = this.state;
+    const { location, properties } = this.state;
     let sections = [];
     sections.push({
       data: [{ value: location ? location.coords : null }],
       title: 'Current location',
       description: `accuracy: ${location ? location.coords.accuracy.toFixed(0) : '100'} meters`
     });
+    properties.forEach(property => {
+      sections.push({
+        data: [{ value: property }],
+        title: property.title,
+        description: null
+      });
+    });
 
     return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <SectionList
-            style={styles.container}
-            renderItem={this._renderItem}
-            renderSectionHeader={this._renderSectionHeader}
-            stickySectionHeadersEnabled={true}
-            keyExtractor={(item, index) => index}
-            // ListHeaderComponent={ListHeader}
-            sections={sections}
-          />
-          <Button title='Save' onPress={this.saveFeature} />
-        </ScrollView>
-      </View>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <SectionList
+          style={styles.container}
+          renderItem={this._renderItem}
+          renderSectionHeader={this._renderSectionHeader}
+          stickySectionHeadersEnabled={true}
+          keyExtractor={(item, index) => index}
+          // ListHeaderComponent={ListHeader}
+          sections={sections}
+        />
+        <Button title='Create' onPress={this.createFeature} />
+      </ScrollView>
     );
   }
 }
@@ -109,117 +159,30 @@ AddFeatureScreen.navigationOptions = {
   }
 };
 
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
-        Learn more
-      </Text>
-    );
-
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled: your app will be slower but you can use useful development tools. {learnMoreButton}
-      </Text>
-    );
-  } else {
-    return <Text style={styles.developmentModeText}>You are not in development mode: your app will run at full speed.</Text>;
-  }
-}
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/workflow/development-mode/');
-}
-
-function handleHelpPress() {
-  WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes');
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.tintColor
   },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center'
-  },
   contentContainer: {
-    paddingTop: 30
+    paddingTop: 0
   },
-  welcomeContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20
-  },
-  welcomeImage: {
-    width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10
-  },
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50
-  },
-  homeScreenFilename: {
-    marginVertical: 7
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)'
-  },
-  codeHighlightContainer: {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 4
-  },
-  getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
-    textAlign: 'center'
-  },
-  tabBarInfoContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3
-      },
-      android: {
-        elevation: 20
-      }
-    }),
-    alignItems: 'center',
-    backgroundColor: '#fbfbfb',
-    paddingVertical: 20
-  },
-  tabBarInfoText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    textAlign: 'center'
-  },
-  navigationFilename: {
-    marginTop: 5
-  },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center'
-  },
-  helpLink: {
-    paddingVertical: 15
-  },
-  helpLinkText: {
+  sectionContentText: {
+    // color: '#808080',
     fontSize: 14,
-    color: '#2e78b7'
+    borderColor: Colors.dark,
+    borderWidth: 1,
+    paddingHorizontal: 10
   }
 });
+
+const mapDispatchToProps = dispatch => {
+  return {
+    actions: bindActionCreators(featureActions, dispatch)
+  };
+};
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(AddFeatureScreen);

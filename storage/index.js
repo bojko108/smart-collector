@@ -1,7 +1,9 @@
 import { AsyncStorage } from 'react-native';
-
+import mapStyle from './mapStyle';
 import * as SETTINGS from './settings';
-export { SETTINGS };
+import { getPropertiesFor } from './fields';
+
+export { mapStyle, SETTINGS, getPropertiesFor };
 
 export const checkSettingsInStore = async () => {
   const settings = getAllSettings();
@@ -10,7 +12,7 @@ export const checkSettingsInStore = async () => {
     if (value === null) {
       await setSetting(settings[i].key, settings[i].default);
     }
-    console.log(value);
+    // console.log(value);
   }
 };
 
@@ -33,4 +35,15 @@ export const getFeatures = async () => {
 
 export const setFeatures = async features => {
   return await AsyncStorage.setItem('sc_features', JSON.stringify(features));
+};
+
+export const addFeature = async feature => {
+  let features = await getFeatures();
+  features.push(feature);
+  await setFeatures(features);
+  return feature;
+};
+
+export const removeAllFeatures = async () => {
+  await setFeatures([]);
 };
