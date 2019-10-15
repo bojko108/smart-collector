@@ -44,7 +44,7 @@ class AddFeatureScreen extends React.Component {
   }
 
   _locationChanged = location => {
-    console.log(`accuracy: ${location.coords.accuracy.toFixed(0)} m`);
+    `accuracy: ${location.coords.accuracy.toFixed(0)} m`;
     this.setState({ location });
   };
 

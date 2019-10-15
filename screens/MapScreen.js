@@ -25,7 +25,6 @@ class MapScreen extends React.Component {
           }}
         >
           {features.map(({ properties, geometry }, index) => {
-            console.log(geometry);
             const fid = properties.fid;
             const [longitude, latitude] = geometry.coordinates;
             const marker = { title: fid.toString(), latlng: { latitude, longitude } };

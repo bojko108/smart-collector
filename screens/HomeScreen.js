@@ -51,7 +51,7 @@ class HomeScreen extends React.Component {
 
     const fileUri = `${FileSystem.cacheDirectory}collected-data`;
     const { exists } = await FileSystem.getInfoAsync(fileUri);
-    console.log(exists);
+
     if (exists === false) {
       await FileSystem.makeDirectoryAsync(fileUri);
     }

@@ -2,7 +2,7 @@ import { actions } from '../actions';
 import initialState from '../initialState';
 
 export default function featureReducer(state = initialState.features, action) {
-  console.log('in store: ' + action.type);
+  // console.log('in store: ' + action.type);
   switch (action.type) {
     case actions.GET_FEATURES:
       return action.features;
