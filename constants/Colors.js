@@ -6,12 +6,17 @@ const light = '#f0f0f0';
 const textLightColor = '#800600';
 const textDarkColor = '#eb7ab1';
 
+const pylon = '#85144b';
+const manhole = '#ff851b';
+
 export default {
   dark,
   darkBackground,
   light,
   background,
   tintColor,
+  pylon,
+  manhole,
   textLightColor,
   textDarkColor,
   tabIconDefault: light,

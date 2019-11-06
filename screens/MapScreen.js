@@ -32,7 +32,7 @@ class MapScreen extends React.Component {
             return (
               <Marker key={fid} anchor={{ x: 0.5, y: 0.5 }} coordinate={marker.latlng} title={marker.title} description={marker.description}>
                 <View style={{ flexDirection: 'row' }}>
-                  <Text style={{ backgroundColor: isPylon ? 'yellow' : 'red', padding: 5 }}>{isPylon ? 'Ст' : 'Ш'}</Text>
+                  <Text style={{ color: 'white', backgroundColor: isPylon ? Colors.pylon : Colors.manhole, padding: 5 }}>{isPylon ? 'Ст' : 'Ш'}</Text>
                 </View>
               </Marker>
             );

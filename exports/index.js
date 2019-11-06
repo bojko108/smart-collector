@@ -13,55 +13,34 @@ export const createPointFeature = (coordinates, properties = {}) => {
 };
 
 export const saveAsGeoJson = async (features, targetCRS = 'WGS84') => {
-  if (targetCRS === 'BGS2005KK') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToLambert(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-  if (targetCRS === 'UTM35N') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToUTM(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-
-  const featureCollection = createFeatureCollection(features);
+  const savedFeatures = transformFeatures(features, targetCRS);
+  const featureCollection = createFeatureCollection(savedFeatures);
   return featureCollection;
 };
 
 export const saveAsAutoCadScript = async (features, targetCRS = 'WGS84') => {
-  if (targetCRS === 'BGS2005KK') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToLambert(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-  if (targetCRS === 'UTM35N') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToUTM(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-
-  const scriptLines = autocad.createScriptForBlocks(features, blockName);
+  const savedFeatures = transformFeatures(features, targetCRS);
+  const scriptLines = autocad.createScriptForBlocks(savedFeatures, blockName);
   return scriptLines;
 };
 
 export const saveAsDxf = async (features, targetCRS = 'WGS84') => {
-  if (targetCRS === 'BGS2005KK') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToLambert(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-  if (targetCRS === 'UTM35N') {
-    features.forEach(feature => {
-      const [x, y] = transformGeographicToUTM(feature.geometry.coordinates.reverse());
-      feature.geometry.coordinates = [y, x];
-    });
-  }
-
-  const dxfAsString = dxf.createDxf(features);
+  const savedFeatures = transformFeatures(features, targetCRS);
+  const dxfAsString = dxf.createDxf(savedFeatures);
   return dxfAsString;
+};
+
+const transformFeatures = (features, targetCRS) => {
+  return features.map(({ type, properties, geometry }) => {
+    const transformed = Object.assign({}, { type: geometry.type }, { coordinates: geometry.coordinates.map(c => c) });
+    if (targetCRS === 'BGS2005KK') {
+      const [x, y] = transformGeographicToLambert(transformed.coordinates.reverse());
+      transformed.coordinates = [x, y];
+    }
+    if (targetCRS === 'UTM35N') {
+      const [x, y] = transformGeographicToUTM(transformed.coordinates.reverse());
+      transformed.coordinates = [y, x];
+    }
+    return Object.assign({}, { type, properties, geometry: transformed });
+  });
 };

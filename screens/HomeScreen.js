@@ -176,7 +176,11 @@ class HomeScreen extends React.Component {
           {features.map(feature => {
             const isPylon = feature.properties.featureType === 'pylon';
             return (
-              <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
+              <TouchableOpacity
+                key={feature.properties.fid}
+                style={{ backgroundColor: Colors[feature.properties.featureType], ...styles.item }}
+                onPress={() => this.showFeatureInfo(feature)}
+              >
                 <Text key={`text-${feature.properties.fid}`} style={{ flex: 1, ...styles.text }}>
                   {`${feature.properties.fid} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
                 </Text>
@@ -212,8 +216,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     padding: 10,
-    marginTop: 3,
-    backgroundColor: Colors.darkBackground
+    marginTop: 3
+    // backgroundColor: Colors.darkBackground
   },
   text: {
     color: Colors.tintColor
