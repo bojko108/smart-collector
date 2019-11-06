@@ -1,9 +1,11 @@
 import React from 'react';
-import { Alert, Text, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
+import { Alert, Button, Text, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
 import * as FileSystem from 'expo-file-system';
+
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { saveAsGeoJson, saveAsDxf } from '../exports';
 import { getSetting, SETTINGS } from '../storage';
@@ -67,6 +69,18 @@ class HomeScreen extends React.Component {
     });
   };
 
+  _deleteFeature = async properties => {
+    Alert.alert('Delete feature?', this._getFeatureInfo({ properties }), [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Yes',
+        onPress: () => {
+          this.props.actions.removeFeature(properties.fid);
+        }
+      }
+    ]);
+  };
+
   _deleteFeatures = async () => {
     this.props.actions.removeAllFeatures();
     const fileUri = `${FileSystem.cacheDirectory}collected-data`;
@@ -112,11 +126,16 @@ class HomeScreen extends React.Component {
   };
 
   showFeatureInfo = ({ properties, geometry }) => {
+    const infoText = this._getFeatureInfo({ properties, geometry });
+    Alert.alert('Feature Info', infoText, [{ text: 'OK', style: 'cancel' }]);
+  };
+
+  _getFeatureInfo = ({ properties, geometry }) => {
     let infoText = '';
     for (let key in properties) {
       infoText += `${key}: ${properties[key]}\n`;
     }
-    Alert.alert('Feature Info', infoText, [{ text: 'OK', style: 'cancel' }]);
+    return infoText;
   };
 
   render() {
@@ -158,9 +177,10 @@ class HomeScreen extends React.Component {
             const isPylon = feature.properties.featureType === 'pylon';
             return (
               <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
-                <Text key={`text-${feature.properties.fid}`} style={styles.text}>
+                <Text key={`text-${feature.properties.fid}`} style={{ flex: 1, ...styles.text }}>
                   {`${index + 1} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
                 </Text>
+                <Icon name='trash' size={32} color={Colors.tintColor} onPress={() => this._deleteFeature(feature.properties)}></Icon>
               </TouchableOpacity>
             );
           })}
@@ -189,6 +209,8 @@ const styles = StyleSheet.create({
     padding: 20
   },
   item: {
+    flex: 1,
+    flexDirection: 'row',
     padding: 10,
     marginTop: 3,
     backgroundColor: Colors.darkBackground

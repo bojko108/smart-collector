@@ -143,7 +143,7 @@ class AddFeatureScreen extends React.Component {
           // ListHeaderComponent={ListHeader}
           sections={sections}
         />
-        <Button title='Create' onPress={this.createFeature} />
+        <Button title='add feature' color={Colors.darkBackground} onPress={this.createFeature} />
       </ScrollView>
     );
   }

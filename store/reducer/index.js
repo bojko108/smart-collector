@@ -8,6 +8,9 @@ export default function featureReducer(state = initialState.features, action) {
       return action.features;
     case actions.ADD_FEATURE:
       return [...state, Object.assign({}, action.createdFeature)];
+    case actions.REMOVE_FEATURE:
+      const fid = action.fid;
+      return state.filter(i => i.properties.fid !== fid);
     case actions.REMOVE_ALL_FEATURES:
       return [];
     default:

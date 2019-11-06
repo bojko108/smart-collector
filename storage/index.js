@@ -44,6 +44,14 @@ export const addFeature = async feature => {
   return feature;
 };
 
+export const removeFeature = async fid => {
+  console.log('remove feature with id:' + fid);
+  const features = await getFeatures();
+  const newFeatures = features.filter(i => i.properties.fid !== fid);
+  await setFeatures(newFeatures);
+  return fid;
+};
+
 export const removeAllFeatures = async () => {
   await setFeatures([]);
 };
