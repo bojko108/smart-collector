@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
+import { Alert, Text, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
@@ -153,16 +153,18 @@ class HomeScreen extends React.Component {
     ];
     return (
       <View style={styles.container}>
-        {features.map((feature, index) => {
-          const isPylon = feature.properties.featureType === 'pylon';
-          return (
-            <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
-              <Text key={`text-${feature.properties.fid}`} style={styles.text}>
-                {`${index + 1} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        <ScrollView>
+          {features.map((feature, index) => {
+            const isPylon = feature.properties.featureType === 'pylon';
+            return (
+              <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
+                <Text key={`text-${feature.properties.fid}`} style={styles.text}>
+                  {`${index + 1} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
         <FloatingAction actions={actions} color={Colors.background} distanceToEdge={10} onPressItem={this._handleActionPress} />
       </View>
     );
