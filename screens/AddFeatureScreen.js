@@ -4,14 +4,14 @@ import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { SectionHeader, SectionContent } from '../components/Common';
 import Colors from '../constants/Colors';
-import { getPropertiesFor } from '../storage';
+import { getPropertiesFor, getFid } from '../storage';
 import { createPointFeature } from '../exports';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { featureActions } from '../store/actions';
 
-const uuid = require('uuid/v4');
+// const uuid = require('uuid/v4');
 // let currentFid = 0;
 
 class AddFeatureScreen extends React.Component {
@@ -51,7 +51,7 @@ class AddFeatureScreen extends React.Component {
   createFeature = async () => {
     const { location, properties } = this.state;
     if (location) {
-      const fid = uuid();
+      const fid = getFid(); // uuid();
       const { latitude, longitude, accuracy, altitude, heading, speed } = location.coords;
       const featureType = this.props.navigation.getParam('featureType');
       let featureProperties = { fid, accuracy, altitude, heading, speed, featureType };

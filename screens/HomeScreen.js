@@ -173,14 +173,14 @@ class HomeScreen extends React.Component {
     return (
       <View style={styles.container}>
         <ScrollView>
-          {features.map((feature, index) => {
+          {features.map(feature => {
             const isPylon = feature.properties.featureType === 'pylon';
             return (
               <TouchableOpacity key={feature.properties.fid} style={styles.item} onPress={() => this.showFeatureInfo(feature)}>
                 <Text key={`text-${feature.properties.fid}`} style={{ flex: 1, ...styles.text }}>
-                  {`${index + 1} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
+                  {`${feature.properties.fid} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
                 </Text>
-                <Icon name='trash' size={32} color={Colors.tintColor} onPress={() => this._deleteFeature(feature.properties)}></Icon>
+                <Icon name='trash' size={24} color={Colors.tintColor} onPress={() => this._deleteFeature(feature.properties)}></Icon>
               </TouchableOpacity>
             );
           })}

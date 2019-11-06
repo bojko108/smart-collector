@@ -5,6 +5,16 @@ import { getPropertiesFor } from './fields';
 
 export { mapStyle, SETTINGS, getPropertiesFor };
 
+let fid = 0;
+
+export const getFid = () => {
+  return ++fid;
+};
+
+export const clearFid = () => {
+  fid = 0;
+};
+
 export const checkSettingsInStore = async () => {
   const settings = getAllSettings();
   for (let i = 0; i < settings.length; i++) {
@@ -53,5 +63,6 @@ export const removeFeature = async fid => {
 };
 
 export const removeAllFeatures = async () => {
+  clearFid();
   await setFeatures([]);
 };
