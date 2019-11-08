@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Text, FlatList, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
+import { Alert, Text, FlatList, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
@@ -181,7 +181,7 @@ class HomeScreen extends React.Component {
               const isPylon = properties.featureType === 'pylon';
               return (
                 <TouchableOpacity
-                  key={properties.fid}
+                  key={properties.fid.toString()}
                   style={{ backgroundColor: Colors[properties.featureType], ...styles.item }}
                   onPress={() => this.showFeatureInfo(item)}
                 >

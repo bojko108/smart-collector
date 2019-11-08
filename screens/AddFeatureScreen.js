@@ -1,18 +1,15 @@
 import React from 'react';
-import { Button, Platform, ScrollView, Picker, StyleSheet, Text, TextInput, SectionList, View } from 'react-native';
+import { Button, ScrollView, Picker, StyleSheet, TextInput, SectionList } from 'react-native';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 import { SectionHeader, SectionContent } from '../components/Common';
 import Colors from '../constants/Colors';
-import { getPropertiesFor, getFid } from '../storage';
+import { getPropertiesFor } from '../storage';
 import { createPointFeature } from '../exports';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { featureActions } from '../store/actions';
-
-// const uuid = require('uuid/v4');
-// let currentFid = 0;
 
 class AddFeatureScreen extends React.Component {
   constructor(props, context) {
@@ -51,12 +48,11 @@ class AddFeatureScreen extends React.Component {
   createFeature = async () => {
     const { location, properties } = this.state;
     if (location) {
-      const fid = getFid(); // uuid();
       const { latitude, longitude, accuracy, altitude, heading, speed } = location.coords;
       const featureType = this.props.navigation.getParam('featureType');
-      let featureProperties = { fid, accuracy, altitude, heading, speed, featureType };
+      let featureProperties = { accuracy, altitude, heading, speed, featureType };
       properties.forEach(({ key, value }) => (featureProperties[key] = value));
-      const feature = createPointFeature([longitude, latitude], featureProperties);
+      const feature = await createPointFeature([longitude, latitude], featureProperties);
 
       this.props.actions.addFeature(feature);
 

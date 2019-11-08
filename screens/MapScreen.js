@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Icon, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Colors from '../constants/Colors';
 import { mapStyle } from '../storage';
@@ -15,7 +15,6 @@ class MapScreen extends React.Component {
         <MapView
           style={{ flex: 1 }}
           showsUserLocation={true}
-          // onUserLocationChange
           customMapStyle={mapStyle}
           initialRegion={{
             latitude: 42.692273,
@@ -24,7 +23,7 @@ class MapScreen extends React.Component {
             longitudeDelta: 0.0421
           }}
         >
-          {features.map(({ properties, geometry }, index) => {
+          {features.map(({ properties, geometry }) => {
             const { fid, featureType } = properties;
             const [longitude, latitude] = geometry.coordinates;
             const marker = { title: `${fid.toString()} - ${featureType}`, latlng: { latitude, longitude } };

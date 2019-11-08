@@ -5,14 +5,15 @@ import { getPropertiesFor } from './fields';
 
 export { mapStyle, SETTINGS, getPropertiesFor };
 
-let fid = 0;
-
-export const getFid = () => {
-  return ++fid;
+export const getNextFeatureNumber = async () => {
+  let counter = Number(await getSetting(SETTINGS.FID_COUNTER));
+  counter += 1;
+  await setSetting(SETTINGS.FID_COUNTER, counter.toString());
+  return counter;
 };
 
-export const clearFid = () => {
-  fid = 0;
+export const clearFeatureCounter = async () => {
+  await setSetting(SETTINGS.FID_COUNTER, SETTINGS.FID_COUNTER.default);
 };
 
 export const checkSettingsInStore = async () => {
@@ -63,6 +64,6 @@ export const removeFeature = async fid => {
 };
 
 export const removeAllFeatures = async () => {
-  clearFid();
+  await clearFeatureCounter();
   await setFeatures([]);
 };

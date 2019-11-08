@@ -49,6 +49,7 @@ export default class SettingsScreen extends React.Component {
           <TextInput
             style={styles.sectionContentText}
             value={setting.value}
+            editable={setting.editable}
             onChangeText={text => {
               this._updateSetting(setting.key, text);
             }}
@@ -78,9 +79,11 @@ export default class SettingsScreen extends React.Component {
     const { settings } = this.state;
     if (settings.length < 1) return null;
 
-    const sections = settings.map(setting => {
-      return { data: [{ value: setting }], title: setting.title };
-    });
+    const sections = settings
+      .filter(setting => setting.visible)
+      .map(setting => {
+        return { data: [{ value: setting }], title: setting.title };
+      });
 
     return (
       <SectionList

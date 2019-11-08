@@ -1,5 +1,9 @@
-export const createFeature = (properties, coordinates, geometryType = 'Point') => {
+import { getNextFeatureNumber } from '../storage';
+
+export const createFeature = async (properties, coordinates, geometryType = 'Point') => {
   let geometry = { coordinates, type: geometryType };
+  const fid = await getNextFeatureNumber();
+  properties.fid = fid;
   return Object.assign({}, { type: 'Feature' }, { geometry, properties });
 };
 

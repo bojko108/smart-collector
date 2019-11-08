@@ -8,8 +8,8 @@ const createFeatureCollection = features => {
   return geojson.createFeatureCollection(features);
 };
 
-export const createPointFeature = (coordinates, properties = {}) => {
-  return geojson.createFeature(properties, coordinates, 'Point');
+export const createPointFeature = async (coordinates, properties = {}) => {
+  return await geojson.createFeature(properties, coordinates, 'Point');
 };
 
 export const saveAsGeoJson = async (features, targetCRS = 'WGS84') => {
