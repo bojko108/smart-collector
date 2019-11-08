@@ -35,7 +35,7 @@ const transformFeatures = (features, targetCRS) => {
     const transformed = Object.assign({}, { type: geometry.type }, { coordinates: geometry.coordinates.map(c => c) });
     if (targetCRS === 'BGS2005KK') {
       const [x, y] = transformGeographicToLambert(transformed.coordinates.reverse());
-      transformed.coordinates = [x, y];
+      transformed.coordinates = [y, x];
     }
     if (targetCRS === 'UTM35N') {
       const [x, y] = transformGeographicToUTM(transformed.coordinates.reverse());

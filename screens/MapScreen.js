@@ -25,14 +25,13 @@ class MapScreen extends React.Component {
           }}
         >
           {features.map(({ properties, geometry }, index) => {
-            const fid = properties.fid;
+            const { fid, featureType } = properties;
             const [longitude, latitude] = geometry.coordinates;
-            const marker = { title: fid.toString(), latlng: { latitude, longitude } };
-            const isPylon = properties.featureType === 'pylon';
+            const marker = { title: `${fid.toString()} - ${featureType}`, latlng: { latitude, longitude } };
             return (
               <Marker key={fid} anchor={{ x: 0.5, y: 0.5 }} coordinate={marker.latlng} title={marker.title} description={marker.description}>
                 <View style={{ flexDirection: 'row' }}>
-                  <Text style={{ color: 'white', backgroundColor: isPylon ? Colors.pylon : Colors.manhole, padding: 5 }}>{isPylon ? 'Ст' : 'Ш'}</Text>
+                  <Text style={{ color: 'white', backgroundColor: Colors[featureType], padding: 5 }}>{fid}</Text>
                 </View>
               </Marker>
             );

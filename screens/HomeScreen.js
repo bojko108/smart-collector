@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Text, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
+import { Alert, Button, Text, FlatList, TouchableOpacity, StyleSheet, View, ScrollView } from 'react-native';
 import { FloatingAction } from 'react-native-floating-action';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
@@ -172,23 +172,28 @@ class HomeScreen extends React.Component {
     ];
     return (
       <View style={styles.container}>
-        <ScrollView>
-          {features.map(feature => {
-            const isPylon = feature.properties.featureType === 'pylon';
-            return (
-              <TouchableOpacity
-                key={feature.properties.fid}
-                style={{ backgroundColor: Colors[feature.properties.featureType], ...styles.item }}
-                onPress={() => this.showFeatureInfo(feature)}
-              >
-                <Text key={`text-${feature.properties.fid}`} style={{ flex: 1, ...styles.text }}>
-                  {`${feature.properties.fid} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${feature.properties.accuracy.toFixed()} meters`}
-                </Text>
-                <Icon name='trash' size={24} color={Colors.tintColor} onPress={() => this._deleteFeature(feature.properties)}></Icon>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        {features.length > 0 && (
+          <FlatList
+            data={features}
+            keyExtractor={item => item.properties.fid.toString()}
+            renderItem={({ item }) => {
+              const properties = item.properties;
+              const isPylon = properties.featureType === 'pylon';
+              return (
+                <TouchableOpacity
+                  key={properties.fid}
+                  style={{ backgroundColor: Colors[properties.featureType], ...styles.item }}
+                  onPress={() => this.showFeatureInfo(item)}
+                >
+                  <Text key={`text-${properties.fid}`} style={{ flex: 1, ...styles.text }}>
+                    {`${properties.fid} - ${isPylon ? 'Pylon' : 'Manhole'}, precision: ${properties.accuracy.toFixed()} meters`}
+                  </Text>
+                  <Icon name='trash' size={24} color={Colors.tintColor} onPress={() => this._deleteFeature(properties)}></Icon>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        )}
         <FloatingAction actions={actions} color={Colors.background} distanceToEdge={10} onPressItem={this._handleActionPress} />
       </View>
     );

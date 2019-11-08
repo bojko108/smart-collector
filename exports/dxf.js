@@ -16,7 +16,9 @@ export const createDxf = features => {
       if (properties[key] && key.startsWith('c_')) {
         const dx = 1;
         const dy = i === 1 ? 1 : 1 + (i - 1) * 2.5;
-        const text = escape(properties[key]).replace(/%u/g, '\\U+');
+        const text = escape(properties[key])
+          .replace(/%u/g, '\\U+')
+          .replace(/'%20/g, ' ');
         drawing.drawText(x + dx, y + dy, 2, 0, text);
         i++;
       }
