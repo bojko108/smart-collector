@@ -7,7 +7,7 @@ import * as FileSystem from 'expo-file-system';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { saveAsGeoJson, saveAsDxf } from '../exports';
+import { saveAsGeoJson, saveAsDxf, saveAsAutoCadScript } from '../exports';
 import { getSetting, SETTINGS } from '../storage';
 import Colors from '../constants/Colors';
 
@@ -42,8 +42,8 @@ class HomeScreen extends React.Component {
         break;
       case 'blocks':
       case 'points':
-        fileContent = 'not implemented yet';
-        extension = '.scr';
+        fileContent = await saveAsAutoCadScript(features, targetCRS);
+        extension = '.txt-renameto-scr';
         break;
       case 'dxf':
         fileContent = await saveAsDxf(features, targetCRS);

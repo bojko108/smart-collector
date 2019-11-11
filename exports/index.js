@@ -20,8 +20,8 @@ export const saveAsGeoJson = async (features, targetCRS = 'WGS84') => {
 
 export const saveAsAutoCadScript = async (features, targetCRS = 'WGS84') => {
   const savedFeatures = transformFeatures(features, targetCRS);
-  const scriptLines = autocad.createScriptForBlocks(savedFeatures, blockName);
-  return scriptLines;
+  const scriptLines = autocad.createScriptForBlocks(savedFeatures);
+  return scriptLines.join('\n');
 };
 
 export const saveAsDxf = async (features, targetCRS = 'WGS84') => {
