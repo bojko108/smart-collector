@@ -120,7 +120,10 @@ class HomeScreen extends React.Component {
       //   await this._saveAsGeoJson();
       //   break;
       case 'bt_delete':
-        Alert.alert('Delete all collected features!', '', [{ text: 'No', style: 'cancel' }, { text: 'Yes', onPress: this._deleteFeatures }]);
+        Alert.alert('Delete all collected features!', '', [
+          { text: 'No', style: 'cancel' },
+          { text: 'Yes', onPress: this._deleteFeatures }
+        ]);
         break;
     }
   };
@@ -238,7 +241,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(HomeScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
